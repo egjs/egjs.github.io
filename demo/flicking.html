@@ -99,6 +99,10 @@
  // create flicking ui and get instance of it
  var $el = $("#wrapper").flicking();
  $el.flicking("instance");  // return instance
+
+ // call some methods
+ $el.flicking("next");
+ $el.flicking("prev", 500);
 </code></pre><br>
 
 <p>2) As creating instance</p>
@@ -115,6 +119,10 @@
 
  // create flicking ui and get instance of it
  var instance = new eg.Flicking("#wrapper");
+
+ // call some methods
+ instance.next();
+ instance.prev(500);
 </code></pre><br>
 
 <hr size="1">
