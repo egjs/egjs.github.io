@@ -86,7 +86,7 @@
 
  // create flicking ui and get instance of it
  var $el = $("#wrapper").flicking();
- $el.data("eg-flicking");  // return instance
+ $el.flicking("instance");  // return instance
 </code></pre><br>
 
 <p>2) As creating instance</p>
@@ -400,7 +400,8 @@ function handler(e) {
 
 // Horizontal direction
 //var f1 = new eg.Flicking("#mflick1");
-var f1 = $("#mflick1").flicking().data("eg-flicking");
+var f1 = $("#mflick1").flicking();
+
 
 var f2 = new eg.Flicking("#mflick2", {
 	duration: 300,
