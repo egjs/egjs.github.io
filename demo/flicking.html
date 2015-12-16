@@ -423,7 +423,7 @@ function handler(e) {
 	}
 
 	log.html((count++) +": <span class=red>"+ e.eventType +"</span> event fired.<br>"+ log.html());
-	handler.end = ~e.eventType.indexOf("flickEnd");
+	handler.end = /^(flickEnd|restore)$/.test(e.eventType);
 }
 
 // Horizontal direction
