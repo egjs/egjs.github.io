@@ -46,19 +46,13 @@
     new WOW().init();
 
 
-    // $("#flick").flicking({
-    //     duration : 300,
-    //     circular : true
-    // });
-
-    var flicking = new eg.Flicking("#flick", {
-        duration: 300,
-        circular: true
-    });
+     $("#flick").flicking({
+         duration : 300,
+         circular : true
+     });
 
     $(window).resize(function() {
-        //$("#flick").flicking("instance").resize();
-        flicking.resize();
+        $("#flick").flicking("instance").resize();
     });
 
 
