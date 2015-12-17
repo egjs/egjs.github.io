@@ -142,6 +142,8 @@ header {
       margin-bottom: 50px; }
       header .header-content .header-content-inner p span {
         background-color: #1d1d1d; }
+    header .header-content .header-content-inner a {
+      margin-bottom: 14px; }
   @media (min-width: 768px) {
     header {
       min-height: 100%; }
@@ -161,6 +163,12 @@ header {
             max-width: 80%;
             margin-left: auto;
             margin-right: auto; } }
+
+.outlink {
+  margin-top: 20px; }
+
+.outlink a {
+  margin-bottom: 12px; }
 
 .section-heading {
   margin-top: 0; }
