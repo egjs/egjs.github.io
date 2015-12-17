@@ -1,13 +1,13 @@
 /**
 * egjs
 * @version 0.0.3-snapshot
-* @SHA-1 6902635
+* @SHA-1 27591e1
 *
 * NAVER corp; egjs JavaScript library
 * http://egjs.github.io
 *
-* Released under MIT license
-* https://egjs.github.io/license
+* Released under the MIT license
+* https://egjs.github.io/license.txt
 *
 * For custom build use egjs-cli
 * https://github.com/egjs/egjs-cli
@@ -163,6 +163,7 @@ var eg = global[ns] = {};
 	function plugin(name) {
 		var upperCamelCase = capitalizeFirstLetter(name);
 		var events;
+		var special;
 		var componentMethodNames;
 
 		if (!(eg[upperCamelCase] && eg[upperCamelCase].prototype._events)) {
@@ -182,12 +183,18 @@ var eg = global[ns] = {};
 			var result;
 			if (typeof options === "string") {
 				ins = this.data(ns + "-" + name);
-				result = ins[options].apply(ins, Array.prototype.slice.call(arguments, 1));
-				return result === ins ? this : result;
+				if (options === "instance") {
+					return ins;
+				} else {
+					result = ins[options].apply(ins, Array.prototype.slice.call(arguments, 1));
+					return result === ins ? this : result;
+				}
 			}
 
 			if (options === undefined || $.isPlainObject(options)) {
-				this.data(ns + "-" + name, new eg[upperCamelCase](this, options || {}));
+				this.data(ns + "-" + name, new eg[upperCamelCase](
+					this, options || {}, name + ":"
+				));
 			}
 			return this;
 		};
@@ -200,12 +207,17 @@ var eg = global[ns] = {};
 		events = eg[upperCamelCase].prototype._events();
 
 		for (var i in events) {
-			for (var j in componentMethodNames) {
-				$.event.special[name + ":" + events[i]] = {};
+			special = $.event.special[name + ":" + events[i]] = {};
 
+			// to not bind native event
+			special.setup = function() {
+				return true;
+			};
+
+			for (var j in componentMethodNames) {
 				// jscs:disable validateLineBreaks, maximumLineLength
 				/*jshint loopfunc: true */
-				$.event.special[name + ":" + events[i]][j] = (function(componentMethodName) {
+				special[j] = (function(componentMethodName) {
 					return function(event, param) {
 						$(this).data(ns + "-" + name)[componentMethodName](
 							event.type,
@@ -718,7 +730,7 @@ return defaultVal;
 	// 3. when user releases fingers on screen, 'click' event is fired at previous position.
 	ns._hasClickBug = function() {
 		var agent = this.agent();
-		var result = agent.os.name === "ios";
+		var result = agent.browser.name === "safari";
 
 		return resultCache(this, "_hasClickBug", [result, agent], result);
 	};
@@ -1830,103 +1842,6 @@ eg.module("css", ["jQuery", document], function($, doc) {
 	};
 
 });
-/**
- * @group jQuery Extension
- */
-/**
- * Flicking plugin in jQuery
- *
- * @ko jQuery flicking plugin
- * @name jQuery#flicking
- * @event
- * @example
- 	<!-- HTML -->
-	<div id="mflick">
-		<div>
-			<p>Layer 0</p>
-		</div>
-		<div>
-			<p>Layer 1</p>
-		</div>
-		<div>
-			<p>Layer 2</p>
-		</div>
-	</div>
-	<script>
-	// create
-	$("#mflick").flicking({
- 		circular : true,
- 		threshold : 50
- 	});
-
- 	// event
- 	$("#mflick").on("flicking:beforeRestore",callback);
- 	$("#mflick").off("flicking:beforeRestore",callback);
- 	$("#mflick").trigger("flicking:beforeRestore",callback);
-
- 	// method
- 	$("#mflick").flicking("option","circular",true); //Set option
- 	$("#mflick").flicking("instance"); // Return flicking instance
- 	$("#mflick").flicking("getNextIndex",1); // Get next panel index
- 	</script>
- * @see eg.Flicking
- */
-
- /**
- * Visible plugin in jQuery
- *
- * @ko jQuery visible plugin
- * @name jQuery#visible
- * @event
- * @example
-	// create
-	$("body").visible();
-
- 	// event
- 	$("body").on("visible:change",callback);
- 	$("body").off("visible:change",callback);
- 	$("body").trigger("visible:change",callback);
-
- 	// method
- 	$("body").visible("option","circular",true); //Set option
- 	$("body").visible("instance"); // Return flicking instance
- 	$("body").visible("check",10); // Check to change target elements.
- 	</script>
- * @see eg.Visble
- */
-
- /**
- * InfiniteGrid plugin in jQuery
- *
- * @ko jQuery InfiniteGrid plugin
- * @name jQuery#infiniteGrid
- * @event
- * @example
-     <ul id="grid">
-        <li class="item">
-          <div>test1</div>
-        </li>
-        <li class="item">
-          <div>test3</div>
-        </li>
-      </ul>
-	// create
-	$("#content").infiniteGrid({
-        itemSelector : ".item"
-    });
-
- 	// event
- 	$("#content").on("infiniteGrid:layoutComplete",callback);
- 	$("#content").off("infiniteGrid:layoutComplete",callback);
- 	$("#content").trigger("infiniteGrid:layoutComplete",callback);
-
- 	// method
- 	$("#content").infiniteGrid("option","itemSelector",".selected"); //Set option
- 	$("#content").infiniteGrid("instance"); // Return infiniteGrid instance
- 	$("#content").infiniteGrid("getBottomElement"); // Get bottom element
- 	</script>
- * @see eg.InfiniteGrid
- */
 // jscs:disable maximumLineLength
 eg.module("persist", ["jQuery", eg, window, document], function($, ns, global, doc) {
 // jscs:enable maximumLineLength
@@ -2191,7 +2106,8 @@ eg.module("visible", ["jQuery", eg, document], function($, ns, doc) {
 		_events: function() {
 			return EVENTS;
 		},
-		construct: function(element, options) {
+		construct: function(element, options, _prefix) {
+			this._prefix = _prefix || "";
 			this.options = {
 				targetClass: "check_visible",
 				expandSize: 0
@@ -2340,7 +2256,7 @@ eg.module("visible", ["jQuery", eg, document], function($, ns, doc) {
 			 * @param {Array} visible The visible elements (the element type is `HTMLElement`) <ko>보여지게 된 엘리먼트들 </ko>
 			 * @param {Array} invisible The invisible elements (the element type is `HTMLElement`) <ko>안 보여지게 된 엘리먼트들 </ko>
 			 */
-			this.trigger(EVENTS.change, {
+			this.trigger(this._prefix + EVENTS.change, {
 				visible: visibles,
 				invisible: invisibles
 			});
@@ -2351,11 +2267,44 @@ eg.module("visible", ["jQuery", eg, document], function($, ns, doc) {
 			this._wrapper = this._timer = null;
 		}
 	});
-
-	ns.Visible._events = function() {
-		return EVENTS;
-	};
 });
+/**
+ * Visible in jQuery plugin
+ *
+ * @ko Visible in jQuery plugin
+ * @name jQuery#visible:change
+ * @event
+ * @example
+	// create
+	$("body").visible();
+
+ 	// event
+ 	$("body").on("visible:change",callback);
+ 	$("body").off("visible:change",callback);
+ 	$("body").trigger("visible:change",callback);
+ * @see eg.Visble
+ */
+/**
+ * visible:change jQuery event plugin
+ *
+ * @ko visible:change jQuery 이벤트 plugin
+ * @method jQuery.visible
+ * @example
+	// create
+	$("body").visible();
+
+ 	// event
+ 	$("body").on("visible:change",callback);
+ 	$("body").off("visible:change",callback);
+ 	$("body").trigger("visible:change",callback);
+
+ 	// method
+ 	$("body").visible("option","circular",true); //Set option
+ 	$("body").visible("instance"); // Return flicking instance
+ 	$("body").visible("check",10); // Check to change target elements.
+ * @see eg.Visble
+ */
+
 // jscs:disable maximumLineLength
 eg.module("movableCoord", ["jQuery", eg, "Hammer"], function($, ns, HM) {
 var SUPPORT_TOUCH = "ontouchstart" in window;
@@ -3246,7 +3195,7 @@ eg.module("flicking", ["jQuery", eg, window, document, eg.MovableCoord], functio
 	 *
 	 * @codepen {"id":"rVOpPK", "ko":"플리킹 기본 예제", "en":"Flicking default example", "collectionId":"ArxyLK", "height" : 403}
 	 *
-	 * @support {"ie": "10+", "ch" : "latest", "ff" : "latest",  "sf" : "latest", "ios" : "7+", "an" : "2.3+ (except 3.x)", "n-ios" : "latest", "n-an" : "latest" }
+	 * @support {"ie": "10+", "ch" : "latest", "ff" : "latest",  "sf" : "latest", "ios" : "7+", "an" : "2.3+ (except 3.x)"}
 	 *
 	 * @see Easing Functions Cheat Sheet {@link http://easings.net/}
 	 * @see If you want to use another easing function then should be import jQuery easing plugin({@link http://gsgd.co.uk/sandbox/jquery/easing/}) or jQuery UI easing.({@link https://jqueryui.com/easing/})<ko>다른 easing 함수를 사용하고 싶다면, jQuery easing plugin({@link http://gsgd.co.uk/sandbox/jquery/easing/})이나, jQuery UI easing({@link https://jqueryui.com/easing/}) 라이브러리를 삽입해야 한다.</ko>
@@ -3272,6 +3221,44 @@ eg.module("flicking", ["jQuery", eg, window, document, eg.MovableCoord], functio
 	 		flickStart : function(e) { ... }
 	 	);
 	 	</script>
+	 */
+	/**
+	 * Flicking plugin in jQuery
+	 *
+	 * @ko jQuery flicking plugin
+	 * @name jQuery#flicking
+	 * @event
+	 * @example
+	 <!-- HTML -->
+	 <div id="mflick">
+		 <div>
+			<p>Layer 0</p>
+		 </div>
+		 <div>
+		 	<p>Layer 1</p>
+		 </div>
+		 <div>
+		 	<p>Layer 2</p>
+		 </div>
+	 </div>
+	 <script>
+	 // create
+	 $("#mflick").flicking({
+		circular : true,
+		threshold : 50
+	});
+
+	 // event
+	 $("#mflick").on("flicking:beforeRestore",callback);
+	 $("#mflick").off("flicking:beforeRestore",callback);
+	 $("#mflick").trigger("flicking:beforeRestore",callback);
+
+	 // method
+	 $("#mflick").flicking("option","circular",true); //Set option
+	 $("#mflick").flicking("instance"); // Return flicking instance
+	 $("#mflick").flicking("getNextIndex",1); // Get next panel index
+	 </script>
+	 * @see eg.Flicking
 	 */
 
 	// define custom events name
@@ -3305,8 +3292,15 @@ eg.module("flicking", ["jQuery", eg, window, document, eg.MovableCoord], functio
 		 * @param {HTMLElement|String|jQuery} element - base element
 		 * @param {Object} options
 		 */
-		construct: function (element, options) {
+		construct: function (element, options, _prefix) {
 			this.$wrapper = $(element);
+
+			if (!this.$wrapper[0] || !this.$wrapper[0].hasChildNodes()) {
+				// jscs:disable validateLineBreaks, maximumLineLength
+				throw new Error("Given base element doesn't exist or it hasn't proper DOM structure to be initialized.");
+
+				// jscs:enable validateLineBreaks, maximumLineLength
+			}
 
 			$.extend(this.options = {
 				hwAccelerable: ns.isHWAccelerable(),  // check weather hw acceleration is available
@@ -3354,6 +3348,7 @@ eg.module("flicking", ["jQuery", eg, window, document, eg.MovableCoord], functio
 				dirData: [],
 				indexToMove: 0,
 				triggerFlickEvent: true,
+				eventPrefix: _prefix || "",
 
 				// For buggy link highlighting on Android 2.x
 				$dummyAnchor: null
@@ -4038,13 +4033,14 @@ eg.module("flicking", ["jQuery", eg, window, document, eg.MovableCoord], functio
 		 * @return {Boolean}
 		 */
 		_triggerEvent: function (name, param) {
-			var panel = this._conf.panel;
+			var conf = this._conf;
+			var panel = conf.panel;
 
-			return this.trigger(name, param = $.extend({
+			return this.trigger(conf.eventPrefix + name, param = $.extend({
 				eventType: name,
 				index: panel.index,
 				no: panel.no,
-				direction: this._conf.touch.direction
+				direction: conf.touch.direction
 			}, param));
 		},
 
@@ -4585,10 +4581,10 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 	 *
 	 * @param {HTMLElement|String|jQuery} element wrapper element <ko>기준 요소</ko>
 	 * @param {Object} [options]
-	 * @param {Number} [options.itemSelector] specifies which child elements will be used as item elements in the layout. <ko>레이아웃의 아이템으로 사용될 엘리먼트들의 셀렉터</ko>
-	 * @param {Boolean} [options.isEqualSize] determine if the size of all of items are same. <ko> 모든 아이템의 사이즈가 동일한지를 지정한다</ko>
-	 * @param {Boolean} [options.defaultGroupKey] when initialzed if you have items in markup, groupkey of them are 'defaultGroupkey' <ko>초기화할때 마크업에 아이템이 있다면, defalutGroupKey를 groupKey로 지정한다</ko>
-	 * @param {Boolean} [options.count=30] if count is more than zero, grid is recyclied. <ko>count값이 0보다 클 경우, 그리드는 일정한 dom 개수를 유지한다</ko>
+	 * @param {String} [options.itemSelector] selector string for layout item elements <ko>레이아웃의 아이템으로 사용될 엘리먼트들의 셀렉터</ko>
+	 * @param {Boolean} [options.isEqualSize=false] determine if all item's size are same <ko> 모든 아이템의 사이즈가 동일한지를 지정한다</ko>
+	 * @param {String} [options.defaultGroupKey=null] when encounter item markup during the initialization, then set `defaultGroupKey` as groupKey <ko>초기화할때 마크업에 아이템이 있다면, defalutGroupKey를 groupKey로 지정한다</ko>
+	 * @param {Number} [options.count=30] when count value is greater than 0, grid will maintain same DOM length recycling <ko>count값이 0보다 클 경우, 그리드는 일정한 dom 개수를 유지한다</ko>
 	 *
 	 * @codepen {"id":"zvrbap", "ko":"InfiniteGrid 데모", "en":"InfiniteGrid example", "collectionId":"DPYEww", "height": 403}
 	 *  @support {"ie": "8+", "ch" : "latest", "ff" : "latest",  "sf" : "latest", "ios" : "7+", "an" : "2.1+ (except 3.x)", "n-ios" : "latest", "n-an" : "latest" }
@@ -4632,7 +4628,7 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 		_events: function() {
 			return EVENTS;
 		},
-		construct: function(el, options) {
+		construct: function(el, options, _prefix) {
 			var opts = $.extend({
 				"isEqualSize": false,
 				"defaultGroupKey": null,
@@ -4641,6 +4637,12 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 			opts.transitionDuration = 0;	// don't use this option.
 			opts.isInitLayout = false;	// isInitLayout is always 'false' in order to controll layout.
 			opts.isResizeBound = false;	// isResizeBound is always 'false' in order to controll layout.
+
+			// if el is jQuery instance, el should change to HTMLElement.
+			if (el instanceof $) {
+				el = el.get(0);
+			}
+			this._prefix = _prefix || "";
 			this.core = new InfiniteGridCore(el, opts)
 				.on(EVENTS.layoutComplete, $.proxy(this._onlayoutComplete, this));
 			this.$global = $(global);
@@ -4863,6 +4865,14 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 				distance = e.length > this.core.items.length ?
 					0 : this.core.items[e.length].position.y;
 			}
+			var item;
+			var i = 0;
+			while (item = e[i++]) {
+				if (typeof item.oldVisibility !== "undefined") {
+					item.element.style.visibility = item.oldVisibility;
+					delete item.oldVisibility;
+				}
+			}
 
 			// reset flags
 			this._reset(true);
@@ -4878,7 +4888,7 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 			 * @param {Boolean} param.isAppend isAppend determine if append or prepend (value is true when call layout method)<ko>아이템이 append로 추가되었는지, prepend로 추가되었는지를 반한환다. (layout호출시에는 true)</ko>
 			 * @param {Number} param.distance distance<ko>layout 전의 최상단 엘리먼트의 거리</ko>
 			 */
-			this.trigger(EVENTS.layoutComplete, {
+			this.trigger(this._prefix + EVENTS.layoutComplete, {
 				target: e.concat(),
 				isAppend: isAppend,
 				distance: distance
@@ -4894,6 +4904,8 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 			var items = this.core.itemize(elements, groupKey);
 			while (item = items[i++]) {
 				item.isAppend = isAppend;
+				item.oldVisibility = item.element.style.visibility;
+				item.element.style.visibility = "hidden";
 			}
 			if (isAppend) {
 				this.core.items = this.core.items.concat(items);
@@ -5069,3 +5081,59 @@ eg.module("infiniteGrid", ["jQuery", eg, window, "Outlayer"], function($, ns, gl
 		}
 	});
 });
+/**
+ * InfiniteGrid in jQuery plugin
+ * @ko InfiniteGrid in jQuery plugin
+ * @method jQuery.infiniteGrid
+ * @example
+     <ul id="grid">
+        <li class="item">
+          <div>test1</div>
+        </li>
+        <li class="item">
+          <div>test3</div>
+        </li>
+      </ul>
+    <script>
+	// create
+	$("#content").infiniteGrid({
+        itemSelector : ".item"
+    });
+ 	// method
+ 	$("#content").infiniteGrid("option","itemSelector",".selected"); //Set option
+ 	$("#content").infiniteGrid("instance"); // Return infiniteGrid instance
+ 	$("#content").infiniteGrid("getBottomElement"); // Get bottom element
+ 	</script>
+ * @see eg.InfiniteGrid
+ */
+ /**
+ * infiniteGrid:layoutComplete jQuery event plugin
+ *
+ * @ko infiniteGrid:layoutComplete jQuery event plugin
+ * @name jQuery#infiniteGrid:layoutComplete
+ * @event
+ * @param {Object} param
+ * @param {Array} param.target target rearranged elements<ko>재배치된 엘리먼트들</ko>
+ * @param {Boolean} param.isAppend isAppend determine if append or prepend (value is true when call layout method)<ko>아이템이 append로 추가되었는지, prepend로 추가되었는지를 반한환다. (layout호출시에는 true)</ko>
+ * @param {Number} param.distance distance<ko>layout 전의 최상단 엘리먼트의 거리</ko>
+ * @example
+     <ul id="grid">
+        <li class="item">
+          <div>test1</div>
+        </li>
+        <li class="item">
+          <div>test3</div>
+        </li>
+      </ul>
+    <script>
+	// create
+	$("#content").infiniteGrid({
+        itemSelector : ".item"
+    });
+ 	// event
+ 	$("#content").on("infiniteGrid:layoutComplete",callback);
+ 	$("#content").off("infiniteGrid:layoutComplete",callback);
+ 	$("#content").trigger("infiniteGrid:layoutComplete",callback);
+ 	</script>
+ * @see eg.InfiniteGrid
+ */
