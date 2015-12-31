@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>egjs::easiest and fastest way to build your web application</title>
-
+    
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
 
@@ -29,7 +29,16 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    
+      ga('create', 'UA-70842526-10', 'auto');
+      ga('send', 'pageview');
+    
+    </script>
 </head>
 
 
@@ -76,7 +85,7 @@
             <hr>
             <p class="desc"><span>&nbsp;A set of UI interactions, effects and&nbsp;<br>
             &nbsp;utilities components library using jQuery&nbsp;</span></p>
-            <a href="https://egjs.github.io/latest/dist/eg.min.js" class="btn btn-primary btn-xl" download>Download v1.0.0</a>&nbsp;&nbsp;&nbsp;
+            <a href="http://egjs.github.io/latest/dist/eg.min.js" class="btn btn-primary btn-xl page-scroll" download>Download v<span id="version"></span></a>&nbsp;&nbsp;&nbsp;
             <a href="#about" class="btn btn-primary btn-xl page-scroll">Find Out More</a>
         </div>
     </div>
@@ -323,8 +332,13 @@
 <script src="js/jquery.fittext.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/wow.min.js"></script>
-<script src="js/eg.min.js"></script>
+<script src="http://egjs.github.io/latest/dist/eg.min.js"></script>
 <script src="js/creative.js"></script>
+<script>
+  $(function(){
+    $("#version").html(eg.VERSION);
+  });
+</script>
 </body>
 
 </html>
