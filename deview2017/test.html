@@ -1,0 +1,455 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" href="./lib/bootstrap.min.css"></link>
+  <link rel="stylesheet" href="./lib/bootflat.min.css"></link>
+  <link rel="stylesheet" href="./lib/site.css"></link>
+  <script src="./lib/jquery.js"></script>
+  <script src="./lib/handlebars.js"></script>
+  <style>
+    #carouselWrapper {
+      background-color: #333;
+      height: 264px;
+      padding-top: 10px;
+      overflow: hidden;
+      position: relative;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .list_container {
+      margin: 0 auto;
+      width: 210px;
+      height: 210px;
+      position: relative;
+      perspective: 1000px;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #carousel {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #carousel figure {
+      margin: 0;
+      padding: 20px;
+      display: block;
+      position: absolute;
+      width: 100%;
+    }
+
+    #list_cd {
+      position: relative;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      width: 100%;
+      border-radius: 100%;
+    }
+
+    #list_cd:before {
+      content: "";
+      display: block;
+      padding-top: 100%;
+    }
+
+    #list_cd_title {
+      color: white;
+      text-align: center;
+      padding-top: 10px;
+      font-size: 0.9em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #list_cd_artist {
+      color: #dadada;
+      text-align: center;
+      font-size: 0.75em;
+    }
+
+    #list_cd_hole {
+      position: absolute;
+      top: 40%;
+      left: 40%;
+      width: 20%;
+      height: 20%;
+      background-color: transparent;
+      border-radius: 100%;
+      z-index: 2;
+    }
+
+    #bullet_container {
+      position: absolute;
+      width: 100%;
+      bottom: 0;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .bullet {
+      display: inline-block;
+      margin: 0 15px;
+    }
+
+    .bullet.active {
+      color: #dadada;
+    }
+
+    .container {
+      margin-top: 20px;
+      padding: 0px;
+      width: 600px;
+      border: 1px solid #e1e1e8;
+      background: #f7f7f9;
+    }
+
+    #qrcode img {
+      margin: 20px auto;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    .cover-image {
+      display: block;
+      width: calc(100%-10);
+      margin: 10px;
+      /* padding-top: 61.8%; */
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      height: 200px;
+    }
+
+    .yellow {
+      color: #ffce00 !important;
+    }
+    #tools {
+      background: #ffce00;
+      padding: 10px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .component {
+      float: left;
+      margin-left: -1px;
+      z-index: 1;
+      color: white;
+      width: 171px;
+      margin: 10px;
+      padding: 10px 0px;
+      border-radius: 10px;
+      background: #8c532e;
+    }
+
+    .component.check .cover-image {
+      background-image: url('./img/check.png') !important;
+    }
+
+    .content {
+      text-align: center;
+    }
+  </style>
+</head>
+<script id="components-template" type="text/x-handlebars-template">
+  {{#each components}}
+  <a href="#"><div class="component" data-index="{{@index}}">
+    <div class="cover-image" style="background-image: url(https://naver.github.io/egjs/img/{{this}}.png)"></div>
+    <div class="content">
+      <h3>{{this}}</h3>
+    </div>
+  </div>
+  </a>
+  {{/each}}
+</script>
+
+<body>
+  <div class="container">
+    <header>
+      <h2>네이버 서비스에 사용된</h2>
+      <h1>
+        <img src="./img/type_black.svg" width="100px"></img>는 무엇이 있을까요?</h1>
+      <h3>아래 캐로셀을 힘껏 돌려주세요!</h3>
+    </header>
+    <div class="jumbotron-photo">
+      <div class="demobox">
+        <div id="carouselWrapper">
+          <div class="list_container">
+            <div id="carousel" style="transform: translateZ(-253px);">
+              <figure style="transform: rotateY(0deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/shopping.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">쇼핑</div>
+                <div id="list_cd_artist">
+                  <a href="http://m.swindow.naver.com/outlet/home" target="_blank">Link</a>
+                </div>
+
+              </figure>
+              <figure style="transform: rotateY(45deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/grafolio.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">그라폴리오</div>
+                <div id="list_cd_artist">
+                  <a href="http://m.grafolio.com/works/list.grfl#tab_wrap" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(90deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/modoo.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">모두</div>
+                <div id="list_cd_artist">
+                  <a href="https://markethub.modoo.at/?link=6stxtz5q" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(135deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/blog.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">블로그</div>
+                <div id="list_cd_artist">
+                  <a href="https://m.blog.naver.com/PostView.nhn?blogId=lump2000&logNo=220971536714&proxyReferer=&proxyReferer=" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(180deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/bboom.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">뿜</div>
+                <div id="list_cd_artist">
+                  <a href="http://m.bboom.naver.com/" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(225deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/land.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">부동산</div>
+                <div id="list_cd_artist">
+                  <a href="https://m.land.naver.com/article/info/1713842414" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(270deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/sports.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">스포츠</div>
+                <div id="list_cd_artist">
+                  <a href="http://m.sports.naver.com/index.nhn" target="_blank">Link</a>
+                </div>
+              </figure>
+              <figure style="transform: rotateY(315deg) translateZ(253px);">
+                <div id="list_cd" style="background-image:url('./img/smartlens.png')">
+                  <div id="list_cd_hole"></div>
+                </div>
+                <div id="list_cd_title">스마트렌즈</div>
+                <div id="list_cd_artist">
+                  <a href="https://s.search.naver.com/p/h_cnd010/p_21811/sbi/search.naver?where=sbi&query=sbi&orgPath=http%3A%2F%2Fblogfiles1.naver.net%2F20110805_228%2Fsabell83_1312550810373Qod26_JPEG%2FIMG_6680.JPG"
+                    target="_blank">Link</a>
+                </div>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div id="qrcode"></div>
+      <h3>핸드폰으로 QR 코드를 찍어주세요</h3>
+    </div>
+    <div>
+      <div style="padding:10px; margin-top:10px; text-align:center; background:#333; color:white">
+        <h2 id="case">사용한 egjs 컴포넌트를 선택해주세요</h2>
+      </div>
+      <div id="tools">
+      </div>
+      <a href="#"  style="text-decoration: none; color:white" id="check_result" ><div style="padding:10px; margin-top:10px; text-align:center; background:#333; color:white">
+          <h2>결과 확인하기</h2>
+        </div>
+      </a>
+    </div>
+    <script src="./lib/qrcode.js"></script>
+    <script src="./lib/axes.pkgd.js"></script>
+    <script>
+      let currentIdx = -1;
+      const data = [{
+          url: "http://m.swindow.naver.com/outlet/home",
+          name: "쇼핑",
+          ans: [0, 1, 2, 3, 4, 5],
+          min: 3
+        },
+        {
+          url: "https://s.search.naver.com/p/h_cnd010/p_21811/sbi/search.naver?where=sbi&query=sbi&orgPath=http%3A%2F%2Fblogfiles1.naver.net%2F20110805_228%2Fsabell83_1312550810373Qod26_JPEG%2FIMG_6680.JPG",
+          name: "스마트렌즈",
+          ans: [2, 3, 4],
+          min: 2
+        },
+        {
+          url: "http://m.sports.naver.com/index.nhn",
+          name: "스포츠",
+          ans: [0, 2, 5],
+          min: 1
+        },
+        {
+          url: "https://m.land.naver.com/article/info/1713842414",
+          name: "부동산",
+          ans: [0, 1, 2, 6],
+          min: 1          
+        },
+        {
+          url: "http://m.bboom.naver.com/",
+          name: "뿜",
+          ans: [0, 1, 2, 5, 8],
+          min: 3
+        },
+        {
+          url: "https://m.blog.naver.com/PostView.nhn?blogId=lump2000&logNo=220971536714&proxyReferer=&proxyReferer=",
+          name: "블로그",
+          ans: [0, 1, 2, 6],
+          min: 1          
+        },
+        {
+          url: "https://markethub.modoo.at/?link=6stxtz5q",
+          name: "모두",
+          ans: [0, 2, 3, 5],
+          min: 2
+        },
+        {
+          url: "http://m.grafolio.com/works/list.grfl#tab_wrap",
+          name: "그라폴리오",
+          ans: [2, 3, 4],
+          min: 2
+        }
+      ];
+      var template = Handlebars.compile($("#components-template").html());
+      $("#tools").html(
+        template({
+          components: [
+            "Axes",
+            "Agent",
+            "Component",
+            "InfiniteGrid",
+            "Persist",
+            "Flicking",
+            "PanoViewer",
+            "SpinViewer",
+            "Visible"
+          ]
+        })
+      ).delegate(".component", "click", e => {
+        if (currentIdx !== -1) {
+          const len = data[currentIdx].ans.length;
+
+          if(!$(e.currentTarget).hasClass("check")) {
+            if(len > $("#tools").find(".check").length) {
+              $(e.currentTarget).toggleClass("check");
+            } else {
+              alert(`이 서비스는 ${len + 1} 개 이상 사용하지 않습니다`);
+            }
+          } else {
+            $(e.currentTarget).toggleClass("check");
+          }
+        }
+        e.stopPropagation();
+        e.preventDefault();
+      });
+
+      $("#check_result").on("click", e => {
+        if (currentIdx === -1) {
+          alert("캐로셀을 힘껏 돌려주세요");
+        } else {
+          const min = data[currentIdx].min;
+          const ans = data[currentIdx].ans;
+          const $checked = $("#tools").find(".check");
+          if(min > $checked.length) {
+            alert(`최소 ${min}개 이상은 선택해야합니다.`);
+          } else {
+            // 정답 체크
+            let count = 0;
+            $checked.each((index, element) => {
+              if(ans.indexOf(Number(element.getAttribute("data-index"))) !== -1) {
+                count++;
+              }
+            });
+            if(count >= min) {
+              alert(`축하합니다. 추첨권과 스티커를 받아가세요!!!`);
+            } else {
+              alert(`다시 찾아보세요. 맞추신 정답은 ${count} 개 입니다`);
+            }
+          }
+        }
+        
+
+        e.stopPropagation();
+        e.preventDefault();
+      });
+      const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: data[0].url,
+        width: 300,
+        height: 300,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      const carousel = document.getElementById("carousel");
+      const COUNT = 8;
+      const ANGLE = 360 / COUNT;
+
+      // 1. Initialize eg.Axes
+      const axes = new eg.Axes({
+        rotate: {
+          range: [0, 3600000],
+          circular: true
+        }
+      });
+
+      // 2. attach event handler
+      axes.on({
+        "change": ({
+          pos
+        }) => {
+          carousel.style[eg.Axes.TRANSFORM] = "translateZ(-253px) rotateY(" + pos.rotate + "deg)";
+        },
+        "release": ({
+          destPos,
+          setTo
+        }) => {
+          currentIdx = Math.round(destPos.rotate / ANGLE) % COUNT;
+          // you can controll animation!
+          setTo({
+            "rotate": Math.round(destPos.rotate / ANGLE) * ANGLE
+          }, 500);
+        },
+        "animationEnd": e => {
+          if (currentIdx !== -1) {
+            qrcode.makeCode(data[currentIdx].url);
+
+            $("#case").html(`사용한 egjs 컴포넌트를 <strong class='yellow'>${data[currentIdx].min}</strong>개 이상 선택해주세요`);
+          }
+        }
+      });
+
+      // 3. Initialize a inputType and connect it
+      axes.connect("rotate", new eg.Axes.PanInput("#carouselWrapper"));
+    </script>
+</body>
+
+</html>

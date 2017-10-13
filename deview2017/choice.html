@@ -1,0 +1,119 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="./lib/bootstrap.min.css"></link>
+  <link rel="stylesheet" href="./lib/site.css"></link>
+  <script src="./lib/jquery.js"></script>
+  <script src="./lib/handlebars.js"></script>
+  <style>
+    .row {
+      margin: 10px 0px 0px;
+      border-bottom: 4px dashed black;
+    }
+    @media print {
+      .pagebreak {
+          page-break-after: always;
+      }
+    }
+    .booth-title {
+      background-color: black;
+      margin-bottom: 20px;
+    }
+
+    .booth-title h3 {
+      color: white;
+    }
+
+    .card1 {
+      border-right: 4px dashed black;
+    }
+
+    .price-title {
+      background-color: #ffce54;
+    }
+
+    .price-title h3 {
+      line-height: 3em;
+    }
+
+    .thumbnail {
+      padding: 0;
+      margin-bottom: 0;
+    }
+
+    .thumbnail img {
+      width: 60%;
+      margin-bottom:40px;
+    }
+
+    .comment {
+      padding: 0px 10px 0px 10px;
+      color: grey;
+    }
+  </style>
+  <script id="cards-template" type="text/x-handlebars-template">
+    {{#each cards}}
+    <div class="row {{#if isPagebreak}}pagebreak{{/if}}" >
+      <div class="card1 col-xs-6 col-lg-6 col-sm-6 col-md-6">
+        <div class="thumbnail">
+          <div class="booth-title caption text-center">
+            <h3>Deview 2017 추첨권 (추첨용)</h3>
+          </div>
+          <img class="img-rounded" src="{{url1}}">
+          <img class="img-rounded" src="{{url2}}">
+          <p></p>
+          <p class="comment">추첨은
+            <strong>11:50, 12:50, 14:50, 15:50, 16:50</strong>에 부스에서 진행합니다. 추첨을 통해 로고가 새겨진 <strong>머그컵</strong>과 <strong>티셔츠</strong>를 드립니다.</p>            
+          <div class="price-title text-center">
+            <h3>#{{num}}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="card2 col-xs-6 col-lg-6 col-sm-6 col-md-6">
+        <div class="thumbnail">
+          <div class="booth-title caption text-center">
+            <h3>Deview 2017 추첨권 (보관용)</h3>
+          </div>
+          <img class="img-rounded" src="{{url1}}">
+          <img class="img-rounded" src="{{url2}}">
+          <p></p>
+          <p class="comment">추첨은
+            <strong>11:50, 12:50, 14:50, 15:50, 16:50</strong>에 부스에서 진행합니다. 추첨을 통해 로고가 새겨진 <strong>머그컵</strong>과 <strong>티셔츠</strong>를 드립니다.</p>              
+          <div class="price-title text-center">
+            <h3>#{{num}}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </script>
+</head>
+
+<body>
+
+
+  <div id="cards">
+  </div>
+
+  <script>
+    var template = Handlebars.compile($("#cards-template").html());
+    var cards = [];
+    for (var i = 0; i < 1000; i++) {
+      cards.push({
+        url1: "https://naver.github.io/egjs/img/logotype1_black.svg",
+        url2: "https://naver.github.io/billboard.js/img/logo/billboard.js.svg",
+        num: i + 1,
+        isPagebreak: (i%2 === 1)
+      });
+    }
+
+    $("#cards").html(
+      template({
+        cards: cards
+      })
+    );
+  </script>
+</body>
+
+</html>
