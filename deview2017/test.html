@@ -9,6 +9,9 @@
   <script src="./lib/jquery.js"></script>
   <script src="./lib/handlebars.js"></script>
   <style>
+    li {
+      list-style: none;
+    }
     #carouselWrapper {
       background-color: #333;
       height: 264px;
@@ -109,11 +112,15 @@
     }
 
     .container {
-      margin-top: 20px;
       padding: 0px;
-      width: 300px;
+      width: 100%;
+      max-width: 600px;
       border: 1px solid #e1e1e8;
       background: #f7f7f9;
+    }
+
+    #case {
+      padding:10px;
     }
 
     #qrcode img {
@@ -122,6 +129,7 @@
 
     header {
       text-align: center;
+      padding:10px;
     }
 
     .cover-image {
@@ -138,15 +146,28 @@
     .yellow {
       color: #ffce00 !important;
     }
+    .toolcontainer {
+      width: 100%;
+      text-align: center;
+      margin: auto;
+    }
     #tools {
       background: #ffce00;
       padding: 0px;
       display: inline-block;
       text-align: center;
+      /* float: right; */
+    position: relative;
+    /* left: -50%; */
+    }
+
+    #tools li {
+      float: left;
+      position: relative;
+    /* left: 50%; */
     }
 
     .component {
-      float: left;
       margin-left: -1px;
       z-index: 1;
       color: white;
@@ -172,13 +193,14 @@
 </head>
 <script id="components-template" type="text/x-handlebars-template">
   {{#each components}}
-  <a href="#"><div class="component" data-index="{{@index}}">
+  <li><a href="#"><div class="component" data-index="{{@index}}">
     <div class="cover-image" style="background-image: url(https://naver.github.io/egjs/img/{{this}}.png)"></div>
     <div class="content">
       <h3>{{this}}</h3>
     </div>
   </div>
   </a>
+  </li>
   {{/each}}
 </script>
 
@@ -273,9 +295,10 @@
       <div style="padding:10px 0px; text-align:center; background:#333; color:white">
         <h2 id="case">사용한 egjs 컴포넌트를 선택해주세요</h2>
       </div>
-      <div id="tools">
+      <div class="toolcontainer">
+        <ul id="tools"></ul>
       </div>
-      <a href="#"  style="text-decoration: none; color:white" id="check_result" ><div style="padding:10px; margin-top:10px; text-align:center; background:#333; color:white">
+      <a href="#" id="check_result" ><div style="padding:10px; margin-top:-10px; text-align:center; background:#333; color:white">
           <h2>결과 확인하기</h2>
         </div>
       </a>
@@ -285,6 +308,7 @@
     <script>
       var random = 10000;
       var currentIdx = -1;
+      var isTry = true;
       
       var data = [{
           url: "http://m.swindow.naver.com/outlet/home",
@@ -351,7 +375,7 @@
           ]
         })
       ).delegate(".component", "click", e => {
-        if (currentIdx !== -1) {
+        if (isTry && currentIdx !== -1) {
           const len = data[currentIdx].ans.length;
 
           if(!$(e.currentTarget).hasClass("check")) {
@@ -369,6 +393,11 @@
       });
 
       $("#check_result").on("click", e => {
+        if (!isTry) {
+          e.stopPropagation();
+          e.preventDefault();
+          return;
+        }
         if (currentIdx === -1) {
           alert("캐로셀을 힘껏 돌려주세요");
         } else {
@@ -449,14 +478,17 @@
               checked = [currentIdx];
               localStorage.setItem("lasttime", nowTime);
               localStorage.setItem("checked", JSON.stringify(checked));
+              isTry = true;
             } else {
               if (checked.indexOf(currentIdx) !== -1) {
                 $("#case").html("다음 시간에 다시 시도해 보세요");
                 alert("30분 내에 동일한 컨텐츠의 문제를 풀수 없습니다.\n30분 후에 다시 시도하거나 다른 컨텐츠를 선택해주세요");
+                isTry = false;
                 return;
               } else {
                 checked.push(currentIdx);
                 localStorage.setItem("checked", JSON.stringify(checked));
+                isTry = true;
               }
             }
             random = Math.floor((Math.random() * 30) + 1);
